@@ -835,11 +835,25 @@
 
   /* ---- Onboarding: ask once, so it can personalize tone from message one ---- */
   const onboardingBanner = document.getElementById('sc-onboarding');
+  const VALID_ONBOARDING = ['skeptic', 'seeker', 'believer'];
+
+  // If the reader arrived via one of the landing page's three links
+  // (coach.html?onboarding=skeptic|seeker|believer), honor that choice
+  // immediately and skip asking again inside the coach.
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromLink = params.get('onboarding');
+    if (fromLink && VALID_ONBOARDING.includes(fromLink)) {
+      localStorage.setItem('sc-onboarding', fromLink);
+      // Clean the URL so a refresh/share doesn't keep the query string visible
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  } catch(e) {}
 
   function maybeShowOnboarding(){
     let existing;
     try{ existing = localStorage.getItem('sc-onboarding'); } catch(e){}
-    if(existing) return; // already answered previously — never ask again
+    if(existing) return; // already answered previously (or arrived via a landing-page link) — never ask again
     onboardingBanner.classList.add('visible');
   }
 
