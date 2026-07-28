@@ -152,6 +152,78 @@ body{display:flex; flex-direction:column; min-height:100vh;}
 }
 .cta-btn:hover{ filter:brightness(1.06); }
 
+/* ---- Access code modal ---- */
+.gate-overlay{
+	display:none;
+	position:fixed;
+	inset:0;
+	background:rgba(0,0,0,0.75);
+	z-index:100;
+	align-items:center;
+	justify-content:center;
+	padding:20px;
+}
+.gate-overlay.visible{ display:flex; }
+.gate-box{
+	background:#161a26;
+	border:1px solid #2c3244;
+	border-radius:10px;
+	padding:28px 26px;
+	max-width:360px;
+	width:100%;
+	text-align:center;
+}
+.gate-box p{
+	font-family:'Source Serif 4',serif;
+	font-size:1.05rem;
+	color:var(--text-hi);
+	margin-bottom:16px;
+}
+.gate-box input{
+	width:100%;
+	background:#0e1119;
+	border:1px solid #2c3244;
+	border-radius:6px;
+	color:var(--text-hi);
+	font-family:'Inter',sans-serif;
+	font-size:1rem;
+	padding:10px 12px;
+	margin-bottom:10px;
+	text-align:center;
+	letter-spacing:0.05em;
+}
+.gate-box input:focus{ outline:none; border-color:var(--evidence); }
+.gate-error{
+	color:#e07a5f;
+	font-size:0.82rem;
+	margin-bottom:10px;
+	min-height:1.1em;
+}
+.gate-submit{
+	display:inline-block;
+	background:var(--meaning);
+	color:#20180a;
+	font-family:'Inter',sans-serif;
+	font-weight:600;
+	font-size:0.9rem;
+	padding:0.6em 1.8em;
+	border-radius:6px;
+	border:none;
+	cursor:pointer;
+	margin-right:8px;
+}
+.gate-cancel{
+	display:inline-block;
+	background:transparent;
+	color:var(--text-lo);
+	font-family:'Inter',sans-serif;
+	font-size:0.85rem;
+	padding:0.6em 1em;
+	border-radius:6px;
+	border:1px solid #2c3244;
+	cursor:pointer;
+}
+
 /* ---- Onboarding section, below the hero ---- */
 .onboard-section{
 	background:var(--ink);
@@ -269,16 +341,16 @@ body{display:flex; flex-direction:column; min-height:100vh;}
 <div class="by">By Terry Whalen</div>
 </div>
 <div class="cta-wrap overlay-text">
-<a href="coach.html" class="cta-btn">Start Here</a>
+<a href="coach.html" class="cta-btn" onclick="return sc_gate('coach.html', this);">Start Here</a>
 </div>
 </div>
 
 <div class="onboard-section">
 <p class="onboard-q">Before we dive in — how are you coming to this book?</p>
 <div class="onboard-actions">
-<a href="coach.html?onboarding=skeptic" class="onboard-btn">I'm skeptical</a>
-<a href="coach.html?onboarding=seeker" class="onboard-btn">Curious, not sure yet</a>
-<a href="coach.html?onboarding=believer" class="onboard-btn">I already believe</a>
+<a href="coach.html?onboarding=skeptic" class="onboard-btn" onclick="return sc_gate('coach.html?onboarding=skeptic', this);">I'm skeptical</a>
+<a href="coach.html?onboarding=seeker" class="onboard-btn" onclick="return sc_gate('coach.html?onboarding=seeker', this);">Curious, not sure yet</a>
+<a href="coach.html?onboarding=believer" class="onboard-btn" onclick="return sc_gate('coach.html?onboarding=believer', this);">I already believe</a>
 </div>
 </div>
 
@@ -304,5 +376,54 @@ document.getElementById('hero-img').addEventListener('error', function(){
 	document.getElementById('hero').classList.add('img-failed');
 });
 </script>
+<!-- Access code modal -->
+<div class="gate-overlay" id="gate-overlay">
+<div class="gate-box">
+<p>Please enter the access code to continue.</p>
+<input type="password" id="gate-input" autocomplete="off" placeholder="Access code">
+<div class="gate-error" id="gate-error"></div>
+<button class="gate-submit" id="gate-submit">Enter</button>
+<button class="gate-cancel" id="gate-cancel">Cancel</button>
+</div>
+</div>
+
+<script>
+// ---- Simple access-code gate ----
+// This is a friendly gate, not real security: the code below is visible
+// to anyone who views the page source. It's meant to keep casual visitors
+// and search engines out, not to stop a determined, tech-savvy visitor.
+// Change ACCESS_CODE to whatever you'd like.
+var ACCESS_CODE = "9812";
+var gatePendingUrl = null;
+
+function sc_gate(url, el){
+	gatePendingUrl = url;
+	document.getElementById('gate-error').textContent = '';
+	document.getElementById('gate-input').value = '';
+	document.getElementById('gate-overlay').classList.add('visible');
+	setTimeout(function(){ document.getElementById('gate-input').focus(); }, 50);
+	return false; // stop the link's default navigation
+}
+
+document.getElementById('gate-cancel').addEventListener('click', function(){
+	document.getElementById('gate-overlay').classList.remove('visible');
+});
+
+function sc_gate_submit(){
+	var entered = document.getElementById('gate-input').value.trim();
+	if(entered.toUpperCase() === ACCESS_CODE.toUpperCase()){
+		try{ sessionStorage.setItem('sc-access', 'granted'); } catch(e){}
+		window.location.href = gatePendingUrl;
+	} else {
+		document.getElementById('gate-error').textContent = 'Incorrect code — please try again.';
+	}
+}
+
+document.getElementById('gate-submit').addEventListener('click', sc_gate_submit);
+document.getElementById('gate-input').addEventListener('keydown', function(e){
+	if(e.key === 'Enter') sc_gate_submit();
+});
+</script>
+
 </body>
 </html>
