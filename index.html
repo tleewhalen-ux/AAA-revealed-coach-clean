@@ -21,13 +21,15 @@
     --text-lo:#c7c4ba;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{background:var(--ink); font-family:'Inter',sans-serif;}
+ html,body{background:var(--ink); font-family:'Inter',sans-serif;}
 
-  .hero{
+.hero{
 	position:relative;
 	width:100%;
 	aspect-ratio:1536/672;
-	max-height:65vh;
+	max-height:70vh;
+	flex-shrink:0;
+}
   }
   .hero img{
     width:100%; height:100%;
@@ -120,11 +122,16 @@
   .cta-btn:hover{ filter:brightness(1.06); }
 
   /* ---- Onboarding section, below the hero ---- */
-  .onboard-section{
-    background:var(--ink);
-    padding:40px 24px 48px;
-    text-align:center;
-    border-top:1px solid rgba(245,243,236,0.08);
+.onboard-section{
+	background:var(--ink);
+	padding:40px 24px 48px;
+	text-align:center;
+	border-top:1px solid rgba(245,243,236,0.08);
+	flex:1;
+	display:flex;
+	flex-direction:column;
+	justify-content:center;
+}
   }
   .onboard-q{
     font-family:'Source Serif 4',serif;
