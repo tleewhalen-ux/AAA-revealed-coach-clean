@@ -397,11 +397,15 @@ var ACCESS_CODE = "9812";
 var gatePendingUrl = null;
 
 function sc_gate(url, el){
-	gatePendingUrl = url;
-	document.getElementById('gate-error').textContent = '';
-	document.getElementById('gate-input').value = '';
-	document.getElementById('gate-overlay').classList.add('visible');
-	setTimeout(function(){ document.getElementById('gate-input').focus(); }, 50);
+	try{
+		gatePendingUrl = url;
+		document.getElementById('gate-error').textContent = '';
+		document.getElementById('gate-input').value = '';
+		document.getElementById('gate-overlay').classList.add('visible');
+		setTimeout(function(){ document.getElementById('gate-input').focus(); }, 50);
+	} catch(err){
+		alert('GATE ERROR: ' + err.message);
+	}
 	return false; // stop the link's default navigation
 }
 
