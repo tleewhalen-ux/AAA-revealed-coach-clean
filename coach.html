@@ -41,10 +41,10 @@
   }
 
   /* ---- Font-size scale: everything below is in em, relative to this ---- */
-  .sc-root[data-fontsize="sm"]{ font-size:14px; }
-  .sc-root[data-fontsize="md"]{ font-size:16px; }
-  .sc-root[data-fontsize="lg"]{ font-size:18px; }
-  .sc-root[data-fontsize="xl"]{ font-size:20px; }
+  .sc-root[data-fontsize="sm"]{ font-size:16px; }
+  .sc-root[data-fontsize="md"]{ font-size:18px; }
+  .sc-root[data-fontsize="lg"]{ font-size:20px; }
+  .sc-root[data-fontsize="xl"]{ font-size:22px; }
 
   /* ---- Reading font toggle ---- */
   .sc-root[data-font="sans"] .sc-title,
@@ -76,7 +76,7 @@
   }
   .sc-eyebrow{
     font-family:'JetBrains Mono',monospace;
-    font-size:0.6875em;
+    font-size:0.8125em;
     letter-spacing:0.14em;
     color:var(--text-lo);
     text-transform:uppercase;
@@ -84,16 +84,17 @@
   }
   .sc-title{
     font-family:'Source Serif 4',serif;
-    font-size:1.625em;
+    font-size:2em;
     font-weight:600;
     margin:0 0 4px;
     color:var(--parchment);
   }
   .sc-sub{
-    font-size:0.8125em;
+    font-size:1em;
+    font-weight:500;
     color:var(--text-lo);
     margin:0 0 20px;
-    line-height:1.5;
+    line-height:1.55;
   }
 
   .sc-beam-wrap{
@@ -128,21 +129,21 @@
     flex-wrap:wrap;
     gap:10px;
     margin-top:16px;
-    padding:10px 12px;
-    background:rgba(0,0,0,0.28);
-    border:1px solid var(--line);
-    border-radius:10px;
+    padding:12px 14px;
+    background:var(--ink-2);
+    border:1.5px solid var(--evidence);
+    border-radius:12px;
   }
   .sc-tool-btn{
     background:var(--ink-2);
-    border:1px solid var(--line);
+    border:1.5px solid var(--evidence);
     color:var(--text-hi);
     font-family:'JetBrains Mono',monospace;
     font-size:0.8125em;
     font-weight:500;
     letter-spacing:0.04em;
     padding:8px 14px;
-    border-radius:6px;
+    border-radius:8px;
     cursor:pointer;
     transition:border-color 0.15s, color 0.15s, background 0.15s;
     white-space:nowrap;
@@ -154,6 +155,12 @@
     background:var(--evidence);
     font-weight:600;
   }
+  .sc-theme-group .sc-tool-btn.active{
+    border-color:var(--meaning);
+    color:var(--ink);
+    background:var(--meaning);
+    font-weight:600;
+  }
   .sc-tool-btn:disabled{ opacity:0.35; cursor:default; }
   .sc-tool-btn:disabled:hover{ border-color:var(--line); color:var(--text-lo); }
 
@@ -161,7 +168,7 @@
     display:flex;
     align-items:center;
     gap:3px;
-    background:rgba(0,0,0,0.35);
+    background:var(--ink);
     border:1px solid var(--line);
     border-radius:8px;
     padding:3px;
@@ -175,7 +182,7 @@
     display:flex;
     align-items:center;
     gap:5px;
-    background:rgba(0,0,0,0.35);
+    background:var(--ink);
     border:1px solid var(--line);
     border-radius:8px;
     padding:3px;
@@ -285,7 +292,8 @@
   }
   .sc-welcome-back.visible{ display:flex; }
   .sc-welcome-back p{
-    font-size:0.8125em;
+    font-size:1em;
+    font-weight:500;
     color:var(--text-hi);
     margin:0;
   }
@@ -359,8 +367,9 @@
     border:1px solid var(--line);
     color:var(--text-lo);
     font-family:'Inter',sans-serif;
-    font-size:0.75em;
-    padding:7px 12px;
+    font-size:0.9375em;
+    font-weight:500;
+    padding:9px 15px;
     border-radius:20px;
     cursor:pointer;
     transition:border-color 0.15s, color 0.15s;
@@ -387,7 +396,8 @@
     border:1px solid var(--line);
     border-radius:10px 10px 2px 10px;
     padding:11px 15px;
-    font-size:0.90625em;
+    font-size:1.0625em;
+    font-weight:500;
     color:var(--text-hi);
   }
   .sc-msg.coach{
@@ -397,14 +407,15 @@
     font-family:'Source Serif 4',serif;
     font-style:italic;
     color:var(--meaning);
-    font-size:0.8125em;
+    font-size:0.9375em;
     display:block;
     margin-bottom:4px;
     letter-spacing:0.02em;
   }
   .sc-msg.coach .sc-body{
     font-family:'Source Serif 4',serif;
-    font-size:1.0625em;
+    font-size:1.25em;
+    font-weight:500;
     color:var(--parchment);
     font-style:normal;
     line-height:1.75;
@@ -412,7 +423,8 @@
 
   .sc-empty{
     color:var(--text-lo);
-    font-size:0.84375em;
+    font-size:1.0625em;
+    font-weight:500;
     line-height:1.7;
     padding-top:6px;
   }
@@ -686,7 +698,7 @@ if (sessionStorage.getItem('sc-access') !== 'granted') { window.location.href = 
   const prefs = {
     theme: localStorage.getItem('sc-theme') || 'white',
     font: localStorage.getItem('sc-font') || 'serif',
-    size: localStorage.getItem('sc-size') || 'lg',
+    size: localStorage.getItem('sc-size') || 'xl',
     listen: false
   };
 
