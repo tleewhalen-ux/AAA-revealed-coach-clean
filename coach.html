@@ -376,6 +376,43 @@
   }
   .sc-chip:hover{border-color:var(--meaning); color:var(--parchment);}
 
+  /* ---- Conversation menu ---- */
+  .sc-conv-menu-wrap{ position:relative; }
+  .sc-conv-menu{
+    display:none;
+    position:absolute;
+    top:calc(100% + 6px);
+    right:0;
+    min-width:210px;
+    background:var(--ink-2);
+    border:1.5px solid var(--evidence);
+    border-radius:10px;
+    padding:6px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    z-index:50;
+  }
+  .sc-conv-menu.open{ display:block; }
+  .sc-conv-menu-item{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:transparent;
+    border:none;
+    color:var(--text-hi);
+    font-family:'Inter',sans-serif;
+    font-size:0.875em;
+    font-weight:500;
+    padding:9px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:background 0.12s;
+  }
+  .sc-conv-menu-item:hover{ background:var(--ink); color:var(--parchment); }
+  .sc-conv-menu-item.danger{ color:#e0716a; }
+  .sc-conv-menu-item.danger:hover{ background:rgba(224,113,106,0.12); color:#e0716a; }
+  .sc-conv-menu-item.done{ color:var(--evidence); }
+  .sc-conv-menu-divider{ height:1px; background:var(--line); margin:6px 4px; }
+
   /* ---- Conversation ---- */
   .sc-thread{
     flex:1;
@@ -594,6 +631,16 @@
         <button id="sc-font-inc" class="sc-tool-btn" title="Larger text">A+</button>
       </div>
       <button id="sc-listen-toggle" class="sc-tool-btn" title="Read the coach's replies aloud">🔈 Listen: Off</button>
+      <div class="sc-conv-menu-wrap">
+        <button id="sc-conv-menu-toggle" class="sc-tool-btn" title="Manage this conversation">🗂️ Conversation</button>
+        <div class="sc-conv-menu" id="sc-conv-menu">
+          <button class="sc-conv-menu-item" id="sc-conv-copy">📋 Copy conversation</button>
+          <button class="sc-conv-menu-item" id="sc-conv-pdf">🖨️ Save as PDF</button>
+          <button class="sc-conv-menu-item" id="sc-conv-doc">📄 Save as Word (.doc)</button>
+          <div class="sc-conv-menu-divider"></div>
+          <button class="sc-conv-menu-item danger" id="sc-conv-clear">🗑️ Clear conversation</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -845,6 +892,113 @@ if (sessionStorage.getItem('sc-access') !== 'granted') { window.location.href = 
   }
 
   checkForSavedSession();
+
+  /* ---- Conversation menu: copy / save as PDF / save as Word / clear ---- */
+  const convMenuToggle = document.getElementById('sc-conv-menu-toggle');
+  const convMenu = document.getElementById('sc-conv-menu');
+  const convCopyBtn = document.getElementById('sc-conv-copy');
+  const convPdfBtn = document.getElementById('sc-conv-pdf');
+  const convDocBtn = document.getElementById('sc-conv-doc');
+  const convClearBtn = document.getElementById('sc-conv-clear');
+
+  function closeConvMenu(){ convMenu.classList.remove('open'); }
+
+  convMenuToggle.addEventListener('click', function(e){
+    e.stopPropagation();
+    convMenu.classList.toggle('open');
+  });
+  document.addEventListener('click', function(e){
+    if(!convMenu.contains(e.target) && e.target !== convMenuToggle) closeConvMenu();
+  });
+
+  function conversationAsPlainText(){
+    if(!history.length) return '';
+    return history.map(function(m){
+      return (m.role === 'user' ? 'YOU:' : 'COACH:') + '\n' + m.content;
+    }).join('\n\n');
+  }
+
+  function conversationAsHTML(){
+    const rows = history.map(function(m){
+      const label = m.role === 'user' ? 'You' : 'Coach';
+      const safe = m.content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      return '<p><strong>' + label + ':</strong><br>' + safe + '</p>';
+    }).join('\n');
+    return rows;
+  }
+
+  function flashMenuItem(btn, label){
+    const original = btn.textContent;
+    btn.textContent = label;
+    btn.classList.add('done');
+    setTimeout(function(){
+      btn.textContent = original;
+      btn.classList.remove('done');
+    }, 1600);
+  }
+
+  convCopyBtn.addEventListener('click', function(){
+    if(!history.length) return;
+    copyText(conversationAsPlainText(), convCopyBtn);
+    setTimeout(closeConvMenu, 300);
+  });
+
+  convPdfBtn.addEventListener('click', function(){
+    if(!history.length) return;
+    const w = window.open('', '_blank');
+    if(!w) return;
+    w.document.write(
+      '<html><head><title>REVEALED Book Coach — Conversation</title>' +
+      '<style>' +
+      'body{font-family:Georgia,serif; max-width:680px; margin:40px auto; padding:0 24px; color:#1a1a1a; line-height:1.6;}' +
+      'p{margin:0 0 1em;} strong{color:#333;}' +
+      '.hdr{font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:#888; margin-bottom:16px;}' +
+      '</style></head><body>' +
+      '<div class="hdr">REVEALED Book Coach — Conversation</div>' +
+      conversationAsHTML() +
+      '</body></html>'
+    );
+    w.document.close();
+    w.focus();
+    setTimeout(function(){ w.print(); }, 300);
+    closeConvMenu();
+  });
+
+  convDocBtn.addEventListener('click', function(){
+    if(!history.length) return;
+    const docHtml =
+      '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+      '<head><meta charset="utf-8"><title>REVEALED Book Coach — Conversation</title></head>' +
+      '<body style="font-family:Georgia,serif; color:#1a1a1a; line-height:1.6;">' +
+      '<p style="font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#888;">REVEALED Book Coach — Conversation</p>' +
+      conversationAsHTML() +
+      '</body></html>';
+    const blob = new Blob(['\ufeff', docHtml], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'revealed-coach-conversation.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    flashMenuItem(convDocBtn, '✓ Saved');
+    setTimeout(closeConvMenu, 500);
+  });
+
+  convClearBtn.addEventListener('click', function(){
+    if(!history.length){ closeConvMenu(); return; }
+    const ok = window.confirm('Clear this entire conversation? This can\'t be undone — copy or save it first if you want to keep it.');
+    if(!ok) return;
+    history = [];
+    messageUIModes = [];
+    clearSession();
+    Array.from(thread.querySelectorAll('.sc-msg, .sc-typing')).forEach(function(el){ el.remove(); });
+    emptyState.style.display = '';
+    emptyStateEl.innerHTML = MODE_COPY[currentMode].empty;
+    wbBanner.classList.remove('visible');
+    closeConvMenu();
+  });
 
   /* ---- Onboarding: ask once, so it can personalize tone from message one ---- */
   const onboardingBanner = document.getElementById('sc-onboarding');
@@ -1156,7 +1310,7 @@ Rules you always follow:
       div.appendChild(actions);
     } else {
       div.className = 'sc-msg coach';
-      div.innerHTML = '<span class="sc-q-mark">the coach gently asks —</span><span class="sc-body"></span>';
+      div.innerHTML = '<span class="sc-body"></span>';
       div.querySelector('.sc-body').textContent = text;
     }
     thread.appendChild(div);
