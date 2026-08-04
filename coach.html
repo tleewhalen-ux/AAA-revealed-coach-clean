@@ -377,12 +377,13 @@
   .sc-chip:hover{border-color:var(--meaning); color:var(--parchment);}
 
   /* ---- Conversation menu ---- */
-  .sc-conv-menu-wrap{ position:relative; }
+  .sc-conv-menu-wrap{ position:relative; flex-basis:100%; display:flex; justify-content:center; margin-top:4px; }
   .sc-conv-menu{
     display:none;
     position:absolute;
     top:calc(100% + 6px);
-    right:0;
+    left:50%;
+    transform:translateX(-50%);
     min-width:210px;
     background:var(--ink-2);
     border:1.5px solid var(--evidence);
