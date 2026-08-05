@@ -1,19 +1,17 @@
 // This runs on Netlify's server, never in the visitor's browser.
 // It keeps the Anthropic API key private and relays coach conversations to Claude.
+
+// author-notes.txt is now fetched LIVE from GitHub on every request instead of
+// being bundled with the function. Edit and commit the file on GitHub and your
+// very next message to the coach will use the updated notes — no Netlify
+// redeploy or cold-start wait required.
+//
+// citations.txt is still large and stable, so it stays as a bundled local file
+// read once at cold-start (no need to re-fetch it on every request).
 const fs = require('fs');
 const path = require('path');
 
-// Read author-notes.txt and citations.txt once when the function cold-starts.
-// Netlify re-runs this file fresh on each new deploy, so edits to either file
-// take effect automatically after you commit and Netlify redeploys.
-let authorNotes = '';
-try {
-  authorNotes = fs.readFileSync(path.join(__dirname, 'author-notes.txt'), 'utf8').trim();
-} catch (err) {
-  // File missing or unreadable — fail silently so the coach still works
-  // with just the built-in BOOK_CONTEXT from coach.html.
-  console.log('author-notes.txt not found or unreadable:', err.message);
-}
+const AUTHOR_NOTES_URL = 'https://raw.githubusercontent.com/tleewhalen-ux/REVEALED-AI-Coach/main/netlify/functions/author-notes.txt';
 
 let citationSources = '';
 try {
@@ -22,6 +20,26 @@ try {
   // File missing or unreadable — fail silently so the coach still works
   // without the external-source bibliography.
   console.log('citations.txt not found or unreadable:', err.message);
+}
+
+async function fetchAuthorNotes() {
+  try {
+    const res = await fetch(AUTHOR_NOTES_URL, {
+      // Ask GitHub's raw CDN not to hand back a stale cached copy.
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if (!res.ok) {
+      console.log('author-notes.txt fetch failed with status:', res.status);
+      return '';
+    }
+    return (await res.text()).trim();
+  } catch (err) {
+    // Network hiccup or file missing — fail silently so the coach still works
+    // with just the built-in BOOK_CONTEXT from coach.html.
+    console.log('author-notes.txt fetch error:', err.message);
+    return '';
+  }
 }
 
 exports.handler = async (event) => {
@@ -37,7 +55,10 @@ exports.handler = async (event) => {
   try {
     const { system, messages } = JSON.parse(event.body);
 
-    // Append author-notes.txt and citations.txt (if present) to whatever
+    // Fetch the latest author notes fresh for this request.
+    const authorNotes = await fetchAuthorNotes();
+
+    // Append citations.txt and author-notes.txt (if present) to whatever
     // system prompt coach.html sent, so they're always the last, most-recent word.
     let fullSystem = system;
     if (citationSources) {
